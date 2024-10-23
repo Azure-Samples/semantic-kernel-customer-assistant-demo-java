@@ -1,0 +1,140 @@
+name: GenerateDownloadLinks
+description: Given a list documents that are relevant to a query, generate a name for each document and return it with the documents id
+template: |
+  <message role="system">
+    Find the documents relevant to answering the users query and generate a name for the document and return it with the documents id.
+  </message>
+  
+  <message role="system">
+    Follow these rules:
+      1. Do not guess or make assumptions about information not available.
+      2. Format a list of documents that match the request in JSON.
+      3. Return documents, NOT EVENT, NOTE or other information. Documents start with DOCUMENT.
+  </message>
+  
+  <message role="system">The following are examples of how to generate a link.</message>
+
+  <message role="user">
+    DOCUMENT 9jh5%2FWkeQNOmWe7kvNYXfQm%2BnYlX0Oiiy43YuXmKMEU%3D:
+        Invoice
+  
+      Invoice Number: 12345
+      Invoice Date: 1/1/2019
+      Due Date: 1/31/2019
+  
+      Bill To:
+        John Doe
+  </message>
+  <message role="user">Request: What is the most recent invoice?</message>
+  <message role="user">
+    {
+      documents: [
+        { 
+          "title": "Invoice 12345",
+          "id": "9jh5%2FWkeQNOmWe7kvNYXfQm%2BnYlX0Oiiy43YuXmKMEU%3D"
+        }
+      ]
+    }
+  </message>
+  
+  <message role="user">
+    DOCUMENT 9jh5%2FWkeQNOmWe7kvNYXfQm%2BnYlX0Oiiy43YuXmKMEU%3D
+        Invoice
+  
+      Invoice Number: 12345
+      Invoice Date: 1/1/2019
+      Due Date: 1/31/2019
+  
+      Bill To:
+        John Doe
+  </message>
+  <message role="user">
+    DOCUMENT 26vpWAosCy6kNTCj2btrkH9D1FF1fS%2FaNztG3sNxG7U%3D
+        Invoice
+  
+      Invoice Number: 12346
+      Invoice Date: 2/1/2019
+      Due Date: 2/28/2019
+  
+      Bill To:
+        John Doe
+  </message>
+  <message role="user">What are all the documents associated to the customer?</message>
+  <message role="user">
+    {
+      documents: [
+          {
+            "title": "Invoice 12345",
+            "id": "9jh5%2FWkeQNOmWe7kvNYXfQm%2BnYlX0Oiiy43YuXmKMEU%3D"
+          },
+          {
+            "title": "Invoice 12346",
+            "id": "26vpWAosCy6kNTCj2btrkH9D1FF1fS%2FaNztG3sNxG7U%3D"
+          }
+        ]
+    }
+  </message>
+  
+  <message role="system">End of examples. The following is the actual user input.</message>
+
+  <message role="system">customerId: {{customerId}}</message>
+  <message role="system">customer: {{customer}}</message>
+  <message role="system">current date time: {{currentDateTime}}</message>
+
+  {{#each facts}}
+    <message role="user">{{this}}</message>
+  {{/each}}
+
+  <message role="user">
+      Request: {{input}}
+  </message>
+
+template_format: handlebars
+input_variables:
+  - name: input
+    description: Question to answer
+    is_required: true
+  - name: facts
+    description: Information used to answer the question
+    is_required: true
+execution_settings:
+  default:
+    max_tokens: 1024
+    temperature: 0
+    top_p: 0
+    presence_penalty: 0.0
+    frequency_penalty: 0.0
+    response_format:
+      type: json_schema
+      json_schema:
+        name: Docs
+        strict: true
+        schema: |
+          {
+            "additionalProperties" : false,
+            "properties" : {
+              "documents" : {
+                "items" : {
+                  "additionalProperties" : false,
+                  "properties" : {
+                    "id" : {
+                      "type" : "string"
+                    },
+                    "title" : {
+                      "type" : "string"
+                    }
+                  },
+                  "required" : [
+                    "id",
+                    "title"
+                  ],
+                  "type" : "object"
+                },
+                "type" : "array"
+              }
+            },
+            "required" : [
+              "documents"
+            ],
+            "type" : "object"
+          }

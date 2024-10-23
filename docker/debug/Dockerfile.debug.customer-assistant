@@ -1,0 +1,51 @@
+######################################################
+## Create Template for build
+FROM mcr.microsoft.com/openjdk/jdk:17-ubuntu as build-template
+
+# Install git, wget, tar, and unzip
+RUN useradd -ms /bin/bash build && \
+    apt-get update && apt-get install -y \
+    git \
+    wget \
+    tar \
+    unzip
+
+WORKDIR /tmp/build
+RUN chown -R build: /tmp/build
+USER build
+
+######################################################
+## Build Semantic Kernel
+FROM build-template as build-sk
+
+RUN git clone -b main --depth=1 --single-branch https://github.com/microsoft/semantic-kernel-java.git && \
+    cd semantic-kernel-java && \
+    ./mvnw -B clean install -DskipTests -Prelease
+
+
+######################################################
+## Create Template for build
+FROM mcr.microsoft.com/openjdk/jdk:21-ubuntu
+
+# Install git, wget, tar, and unzip
+RUN groupadd --gid=1000 build && \
+    useradd --uid 1000 --gid 1000 -ms /bin/bash build && \
+    mkdir -p /app/target || true && \
+    chown -R build:build /app/
+
+COPY --from=build-sk --chown=build /home/build/.m2 /home/build/.m2
+
+WORKDIR /app
+
+USER build
+
+EXPOSE 8080
+EXPOSE 5005
+
+CMD     rm /tmp/testdb.* || true && \
+        if [ -f /run/secrets/envFile ]; then \
+            export $(grep -v '^#' /run/secrets/envFile | xargs) \
+        fi && \
+        ./mvnw quarkus:dev -Dsuspend=true -DdebugHost=0.0.0.0
+
+

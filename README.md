@@ -1,57 +1,69 @@
-# Project Name
+# Customer Assistant
 
-(short, 1-3 sentenced, description of the project)
+This application is a customer assistant that can answer questions and also take actions about and towards a customer's
+account.
 
 ## Features
 
-This project framework provides the following features:
+This application utilizes the following features:
 
-* Feature 1
-* Feature 2
-* ...
+- Semantic Kernel for Java
+    - Vector data stores
+    - Chat completions with OpenAI
+    - Embedding with OpenAI
+- OpenAI
+- React UI
+- Quarkus
 
 ## Getting Started
 
-### Prerequisites
+Before running the application in any way, proceed with the following:
 
-(ideally very short, if any)
+1. In the `docker` folder, make a copy of `demo.properties_example` to `demo.properties` (in the same folder), and fill
+   in the required keys.
 
-- OS
-- Library version
-- ...
+To run the application locally as a container, have Docker Desktop or Podman installed, then run the following command:
 
-### Installation
+```bash
+cd docker
+docker compose up --build --force-recreate
+```
 
-(ideally very short)
+#### Debug
 
-- npm install [package name]
-- mvn install
-- ...
+To run the application in debugging mode, from the customer-assistant folder, run:
 
-### Quickstart
-(Add steps to get up and running quickly)
+Create a .env file at `customer-assistant/.env` containing:
 
-1. git clone [repository clone url]
-2. cd [repository name]
-3. ...
+```shell
+OPENAI_ENDPOINT=https://<your-endpoint>.openai.azure.com
+AZURE_CLIENT_SECRET=<openai-secret>
+CHATCOMPLETION_MODEL=gpt-4o
+EMBEDDING_MODEL=text-embedding-3-large
+```
 
+Deploy a local UI in a container:
 
-## Demo
-
-A demo app is included to show how to use the project.
-
-To run the demo, follow these steps:
-
-(Add steps to start up the demo)
-
-1.
-2.
-3.
+```bash
+docker-compose -f docker/debug/docker-compose-dev.yml up
+```
 
 ## Resources
 
-(Any additional resources or related projects)
+- [Semantic Kernel for Java](https://github.com/microsoft/semantic-kernel-java)
+- [Semantic Kernel for Java Documentation](https://learn.microsoft.com/en-us/semantic-kernel/)
 
-- Link to supporting information
-- Link to similar sample
-- ...
+## Guidance
+
+### Costs
+
+This application uses Azure OpenAI, which may incur costs. Please refer to
+the [Azure OpenAI website](https://azure.microsoft.com/en-us/pricing/details/cognitive-services/openai-service/) for
+more information.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Important Security Notice
+

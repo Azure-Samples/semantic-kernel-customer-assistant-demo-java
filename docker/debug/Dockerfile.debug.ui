@@ -1,0 +1,12 @@
+FROM node:lts-alpine3.19
+
+WORKDIR /app
+
+CMD     mkdir /app/node_modules || true && \
+        mkdir /app/target || true && \
+        touch package-lock.json && \
+        chown -R node:node /app/ && \
+        su - node -c "cd /app && \
+        ls -la && \
+        npm --loglevel verbose install && \
+        npm run start"
