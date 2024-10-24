@@ -1,0 +1,25 @@
+version: '3.6'
+services:
+  customer-assistant-api:
+    image: "customer-assistant-api"
+    user: 1000:1000
+    build:
+      context: ../..
+      dockerfile: ./docker/Dockerfile.customer-assistant
+    ports:
+      - "127.0.0.1:8080:8080"
+      - "127.0.0.1:5005:5005"
+    secrets:
+      - demo
+      - envFile
+
+  customer-assistant-react-app:
+    image: "customer-assistant-react-app"
+    build:
+      context: ../../
+      dockerfile: ./docker/Dockerfile.ui
+secrets:
+  demo:
+    file: ../demo.properties
+  envFile:
+    file: ./.env

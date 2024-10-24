@@ -1,0 +1,37 @@
+######################################################
+## Build Demo
+FROM mcr.microsoft.com/openjdk/jdk:21-ubuntu as build-demo
+
+# Install git, wget, tar, and unzip
+RUN useradd -ms /bin/bash build
+
+WORKDIR /tmp/build
+
+RUN chown -R build: /tmp/build
+
+COPY --chown=build customer-assistant /tmp/build/
+
+USER build
+
+# Build the project
+RUN ./mvnw -B clean install -DskipTests
+
+######################################################
+## Build Deployment
+FROM mcr.microsoft.com/openjdk/jdk:21-ubuntu
+
+RUN useradd -ms /bin/bash deploy
+
+COPY --chown=deploy docker/run.sh /home/deploy/
+RUN chmod +x /home/deploy/run.sh
+
+WORKDIR /home/deploy
+USER deploy
+
+COPY --from=build-demo --chown=deploy /tmp/build/target/quarkus-app /home/deploy/
+
+EXPOSE 8080
+EXPOSE 8443
+
+CMD /home/deploy/run.sh
+

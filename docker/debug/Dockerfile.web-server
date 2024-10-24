@@ -1,0 +1,11 @@
+######################################################
+## Build UI
+FROM nginx as customer-assistant-web-server
+
+COPY ./nginx.dev.conf /etc/nginx/nginx.conf.template
+
+CMD export ENV_API_URL="$API_URL" && \
+    export ENV_REACT_URL="$REACT_URL" && \
+    envsubst '$ENV_API_URL,$ENV_REACT_URL' < /etc/nginx/nginx.conf.template > /etc/nginx/conf.d/default.conf && \
+    cat /etc/nginx/conf.d/default.conf && \
+    nginx -g 'daemon off;'

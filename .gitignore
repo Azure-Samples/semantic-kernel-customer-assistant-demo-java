@@ -396,3 +396,24 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
+
+
+# Maven settings
+conf.properties
+**/target
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+**/.mvn/wrapper/maven-wrapper.jar
+
+
+# JetBrains IntelliJ
+.idea
+*.ipr
+*.iml
+*.iws
