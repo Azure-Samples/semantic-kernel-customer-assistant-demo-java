@@ -15,8 +15,6 @@ services:
     language: java
     host: containerapp
     project: ../../
-    ports:
-      - "8080:8080"
     docker:
       context: .
       path: ./docker/Dockerfile.customer-assistant

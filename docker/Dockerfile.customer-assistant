@@ -9,12 +9,14 @@ WORKDIR /tmp/build
 
 RUN chown -R build: /tmp/build
 
-COPY --chown=build customer-assistant /tmp/build/
+COPY --chown=build ./.mvn /tmp/build/.mvn
+COPY --chown=build ./mvnw ./pom.xml /tmp/build/
+COPY --chown=build ./src /tmp/build/src
 
 USER build
 
 # Build the project
-RUN ./mvnw -B clean install -DskipTests
+RUN ./mvnw install -DskipTests
 
 ######################################################
 ## Build Deployment
@@ -31,7 +33,6 @@ USER deploy
 COPY --from=build-demo --chown=deploy /tmp/build/target/quarkus-app /home/deploy/
 
 EXPOSE 8080
-EXPOSE 8443
 
 CMD /home/deploy/run.sh
 

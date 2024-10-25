@@ -16,6 +16,7 @@
 #cognativesearch.endpoint: xxx
 #cognativesearch.token: xxx
 
-db.connectionString=xxx
-client.azureopenai.key: xxx
-client.azureopenai.endpoint: xxx
+#db.connectionString=xxx
+
+azure.client.secret=xxx
+openai.endpoint=https://<INSTANCE ID>.openai.azure.com

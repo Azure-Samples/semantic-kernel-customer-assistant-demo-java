@@ -17,7 +17,31 @@ This application utilizes the following features:
 
 ## Getting Started
 
-Before running the application in any way, proceed with the following:
+#### Deploy To Azure Container Apps
+
+```bash
+cd infra/aca
+
+## If needed
+# azd auth login
+
+azd up
+```
+
+When deployed, you will need to grant "Cogntive Services User" role to the managed identity of the api service. Inside
+the resource group of the deployed resources, find the managed identity of the api service, named `id-api-xxxx`.
+We need to [assign the "Cognitive Services User" role to the
+`id-api-xxxx` managed identity](https://learn.microsoft.com/en-us/entra/identity/managed-identities-azure-resources/how-to-assign-access-azure-resource?pivots=identity-mi-access-portal).
+Browse to your Azure OpenAI instance in the portal, select "Access control (IAM)", "Role assignments" and add a role
+assignment for the managed identity.
+After permission has been granted you can restart your application by re-running `azd up`.
+
+You can now browse to the web service of the deployed asset that will be displayed in the output of the `azd up`. Will
+look like: `https://ca-web-XXXX.azurecontainerapps.io/`
+
+#### Run Locally
+
+Before running the application:
 
 1. In the `docker` folder, make a copy of `demo.properties_example` to `demo.properties` (in the same folder), and fill
    in the required keys.
@@ -27,25 +51,6 @@ To run the application locally as a container, have Docker Desktop or Podman ins
 ```bash
 cd docker
 docker compose up --build --force-recreate
-```
-
-#### Debug
-
-To run the application in debugging mode, from the customer-assistant folder, run:
-
-Create a .env file at `customer-assistant/.env` containing:
-
-```shell
-OPENAI_ENDPOINT=https://<your-endpoint>.openai.azure.com
-AZURE_CLIENT_SECRET=<openai-secret>
-CHATCOMPLETION_MODEL=gpt-4o
-EMBEDDING_MODEL=text-embedding-3-large
-```
-
-Deploy a local UI in a container:
-
-```bash
-docker-compose -f docker/debug/docker-compose-dev.yml up
 ```
 
 ## Resources
