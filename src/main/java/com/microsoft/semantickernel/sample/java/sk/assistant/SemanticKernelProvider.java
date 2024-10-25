@@ -2,6 +2,7 @@ package com.microsoft.semantickernel.sample.java.sk.assistant;
 
 import com.azure.ai.openai.OpenAIAsyncClient;
 import com.azure.ai.openai.OpenAIClientBuilder;
+import com.azure.core.http.HttpRequest;
 import com.azure.core.http.policy.FixedDelayOptions;
 import com.azure.core.http.policy.RetryOptions;
 import com.azure.core.util.HttpClientOptions;
@@ -55,6 +56,7 @@ public class SemanticKernelProvider {
     private final CustomerDataStore customerDataStore;
     private final AuthenticationProvider authenticationProvider;
     private final String profile;
+    private final String modelVersion;
     private VectorStore vectorStore;
     private JDBCVectorStore memoryStore;
 
@@ -70,10 +72,17 @@ public class SemanticKernelProvider {
             @ConfigProperty(name = "chatcompletion.model", defaultValue = "gpt-4o")
             String model,
 
+            @ConfigProperty(name = "chatcompletion.modelversion", defaultValue = "2024-08-01-preview")
+            String modelVersion,
+
             @ConfigProperty(name = "profile", defaultValue = "deploy")
             String profile
     ) {
         this.model = model;
+        if (modelVersion == null) {
+            modelVersion = "2024-08-01-preview";
+        }
+        this.modelVersion = modelVersion;
         this.customers = customers;
         this.openAiEndpoint = openAiEndpoint;
         this.authenticationProvider = authenticationProvider;
@@ -99,10 +108,9 @@ public class SemanticKernelProvider {
                 .blockLast();
     }
 
-    private OpenAIAsyncClient getOpenAIAsyncClient() {
+    private OpenAIAsyncClient getOpenAIAsyncClient(String apiVersion) {
 
         RetryOptions retryOptions = new RetryOptions(new FixedDelayOptions(2, Duration.ofSeconds(10)));
-
 
         OpenAIClientBuilder builder = new OpenAIClientBuilder()
                 .clientOptions(new HttpClientOptions()
@@ -110,6 +118,17 @@ public class SemanticKernelProvider {
                         .setResponseTimeout(Duration.ofSeconds(10)))
                 .retryOptions(retryOptions)
                 .endpoint(openAiEndpoint);
+
+        if (apiVersion != null) {
+            builder.addPolicy(
+                    (context, next) -> {
+                        HttpRequest request = context.getHttpRequest();
+                        String url = request.getUrl().toString().replaceAll("api-version=[^&]*", "api-version=" + apiVersion);
+                        request.setUrl(url);
+                        return next.process();
+                    }
+            );
+        }
 
         if ("devEnv".equals(profile)) {
             return builder
@@ -127,7 +146,7 @@ public class SemanticKernelProvider {
                 .withAIService(ChatCompletionService.class,
                         OpenAIChatCompletion.builder()
                                 .withModelId(model)
-                                .withOpenAIAsyncClient(getOpenAIAsyncClient())
+                                .withOpenAIAsyncClient(getOpenAIAsyncClient(modelVersion))
                                 .build()
                 );
         return addSkills(builder).build();
@@ -275,7 +294,7 @@ public class SemanticKernelProvider {
 
     public OpenAITextEmbeddingGenerationService getEmbedding() {
         return OpenAITextEmbeddingGenerationService.builder()
-                .withOpenAIAsyncClient(getOpenAIAsyncClient())
+                .withOpenAIAsyncClient(getOpenAIAsyncClient(null))
                 .withModelId("text-embedding-3-large")
                 .withDimensions(1536)
                 .build();
