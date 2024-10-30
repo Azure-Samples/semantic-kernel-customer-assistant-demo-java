@@ -9,6 +9,8 @@ services:
     docker:
       context: .
       path: ./docker/Dockerfile.ui
+    ports:
+      - "8080:80"
     depends_on:
       - api
   api:
@@ -18,3 +20,5 @@ services:
     docker:
       context: .
       path: ./docker/Dockerfile.customer-assistant
+      ports:
+        - "8080:80"
