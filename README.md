@@ -60,12 +60,14 @@ cd docker
 docker compose up --build --force-recreate
 ```
 
+When started the app will be available at `http://localhost:3000/`.
+
 ## Troubleshooting
 
 #### My API instance is crashing with a "DeploymentNotFound" error
 
 You have probably not deployed the chat completion and embeddings OpenAI models to the instance, or then names of your
-deployments do not match the configured values in demo.properties (default values are `gpt-4o` and ``).
+deployments do not match the configured values in demo.properties (default values are `gpt-4o` and `text-embedding-3-large`).
 
 #### I receive errors when running the application "json_schema is not supported"
 
