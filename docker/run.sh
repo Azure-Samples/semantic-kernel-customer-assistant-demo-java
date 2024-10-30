@@ -12,5 +12,5 @@ if [ -f /run/secrets/envFile ]; then
     cp /run/secrets/envFile ./.env
 fi
 
-java -jar quarkus-run.jar -Dquarkus.http.host=0.0.0.0
+java -jar quarkus-run.jar -Dquarkus.http.host=0.0.0.0 -Dquarkus.http.port=8080
 #java -agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=*:5005 -jar quarkus-run.jar -Dquarkus.http.host=0.0.0.0

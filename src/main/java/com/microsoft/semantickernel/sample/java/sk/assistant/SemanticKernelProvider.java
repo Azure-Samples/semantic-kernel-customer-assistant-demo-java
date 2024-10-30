@@ -57,6 +57,7 @@ public class SemanticKernelProvider {
     private final AuthenticationProvider authenticationProvider;
     private final String profile;
     private final String modelVersion;
+    private final String embeddingModel;
     private VectorStore vectorStore;
     private JDBCVectorStore memoryStore;
 
@@ -75,6 +76,10 @@ public class SemanticKernelProvider {
             @ConfigProperty(name = "chatcompletion.modelversion", defaultValue = "2024-08-01-preview")
             String modelVersion,
 
+
+            @ConfigProperty(name = "embedding.model", defaultValue = "text-embedding-3-large")
+            String embeddingModel,
+
             @ConfigProperty(name = "profile", defaultValue = "deploy")
             String profile
     ) {
@@ -82,6 +87,12 @@ public class SemanticKernelProvider {
         if (modelVersion == null) {
             modelVersion = "2024-08-01-preview";
         }
+
+        if (embeddingModel == null) {
+            embeddingModel = "text-embedding-3-large";
+        }
+
+        this.embeddingModel = embeddingModel;
         this.modelVersion = modelVersion;
         this.customers = customers;
         this.openAiEndpoint = openAiEndpoint;
@@ -295,7 +306,7 @@ public class SemanticKernelProvider {
     public OpenAITextEmbeddingGenerationService getEmbedding() {
         return OpenAITextEmbeddingGenerationService.builder()
                 .withOpenAIAsyncClient(getOpenAIAsyncClient(null))
-                .withModelId("text-embedding-3-large")
+                .withModelId(embeddingModel)
                 .withDimensions(1536)
                 .build();
     }

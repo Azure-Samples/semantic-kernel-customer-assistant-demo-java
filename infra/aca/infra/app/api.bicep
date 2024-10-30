@@ -12,6 +12,9 @@ param serviceName string = 'api'
 param corsAcaUrl string
 param exists bool
 param openaiEndpoint string
+param openAiServicePrincipalId string
+param openAiServiceName string
+param openAiResourceGroupName string
 
 resource apiIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
   name: identityName
@@ -83,6 +86,7 @@ resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' existing = {
   name: keyVaultName
 }
 
+output SERVICE_API_IDENTITY_ID string = apiIdentity.id
 output SERVICE_API_IDENTITY_PRINCIPAL_ID string = apiIdentity.properties.principalId
 output SERVICE_API_NAME string = app.outputs.name
 output SERVICE_API_URI string = app.outputs.uri

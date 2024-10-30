@@ -9,6 +9,8 @@ services:
     secrets:
       - demo
       - envFile
+    ports:
+      - "8080:8080"
   customer-assistant-react-app:
     image: "customer-assistant-react-app"
     build:
@@ -17,7 +19,7 @@ services:
     environment:
       - API_URL=http://customer-assistant-api:8080
     ports:
-      - "8080:80"
+      - "3000:80"
 secrets:
   demo:
     file: ./demo.properties

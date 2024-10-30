@@ -19,6 +19,13 @@ This application utilizes the following features:
 
 #### Deploy To Azure Container Apps
 
+To deploy the application you will need a deployment of OpenAI. This will need to have 2 models deployed to it:
+
+- A chat completion model, by default this is named `gpt-4o` but this can be configured.
+- An embedding model, by default this is named `text-embedding-3-large` but this can be configured.
+
+You will be asked for the resource group and the name of the OpenAI instance during deployment.
+
 ```bash
 cd infra/aca
 
@@ -52,6 +59,20 @@ To run the application locally as a container, have Docker Desktop or Podman ins
 cd docker
 docker compose up --build --force-recreate
 ```
+
+## Troubleshooting
+
+#### My API instance is crashing with a "DeploymentNotFound" error
+
+You have probably not deployed the chat completion and embeddings OpenAI models to the instance, or then names of your
+deployments do not match the configured values in demo.properties (default values are `gpt-4o` and ``).
+
+#### I receive errors when running the application "json_schema is not supported"
+
+Ensure that the model you have deployed supports the `json_schema` format, at time of writing this requires:
+- gpt-4o-mini-2024-07-18 and later
+- gpt-4o-2024-08-06 and later
+See: https://platform.openai.com/docs/guides/structured-outputs/introduction
 
 ## Resources
 

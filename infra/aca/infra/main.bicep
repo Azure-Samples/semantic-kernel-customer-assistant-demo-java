@@ -10,9 +10,12 @@ param environmentName string
 param location string
 
 @minLength(1)
-@description('Openai endpoint URL')
-param openaiEndpoint string
+@description('Openai Deployment Name')
+param openAiServiceName string
 
+@minLength(1)
+@description('Openai Deployment Resource Group Name')
+param openAiResourceGroupName string
 
 // Optional parameters to override the default azd resource naming conventions. Update the main.parameters.json file to provide values. e.g.,:
 // "resourceGroupName": {
@@ -48,6 +51,7 @@ param principalId string = ''
 @description('The base URL used by the web service for sending API requests')
 param webApiBaseUrl string = ''
 
+var openaiEndpoint = 'https://${openAiServiceName}.openai.azure.com/'
 var abbrs = loadJsonContent('./abbreviations.json')
 var resourceToken = toLower(uniqueString(subscription().id, environmentName, location))
 var tags = { 'azd-env-name': environmentName }
@@ -83,6 +87,16 @@ module containerApps './core/host/container-apps.bicep' = {
   }
 }
 
+resource openAiService 'Microsoft.CognitiveServices/accounts@2023-05-01' existing = {
+  name: openAiServiceName
+  scope: resourceGroup(openAiResourceGroupName)
+}
+
+// Cogitive Services User Role
+var roleDefinitionID = 'a97b65f3-24c7-4388-baec-2e87135dc908'
+
+var openAiServicePrincipalId = guid(openAiResourceGroupName, openAiServiceName, roleDefinitionID)
+
 // Api backend
 module api './app/api.bicep' = {
   name: 'api'
@@ -100,6 +114,21 @@ module api './app/api.bicep' = {
     corsAcaUrl: corsAcaUrl
     exists: apiAppExists
     openaiEndpoint: openaiEndpoint
+    openAiServicePrincipalId: openAiServicePrincipalId
+    openAiServiceName: openAiServiceName
+    openAiResourceGroupName: openAiResourceGroupName
+  }
+}
+
+module apiAuth './app/apiAuth.bicep' = {
+  name: 'apiAuth'
+  scope: resourceGroup(openAiResourceGroupName)
+  params: {
+    name: 'apiAuth'
+    location: location
+    tags: tags
+    apiIdentityId: api.outputs.SERVICE_API_IDENTITY_ID
+    apiIdentityPrincipalId: api.outputs.SERVICE_API_IDENTITY_PRINCIPAL_ID
   }
 }
 
@@ -158,10 +187,6 @@ module apim './core/gateway/apim.bicep' = if (useAPIM) {
     applicationInsightsName: monitoring.outputs.applicationInsightsName
   }
 }
-
-// Data outputs
-//output AZURE_COSMOS_CONNECTION_STRING_KEY string = cosmos.outputs.connectionStringKey
-//output AZURE_COSMOS_DATABASE_NAME string = cosmos.outputs.databaseName
 
 // App outputs
 output API_CORS_ACA_URL string = corsAcaUrl
