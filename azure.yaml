@@ -5,7 +5,7 @@ services:
   web:
     language: js
     host: containerapp
-    project: ../../
+    project: .
     docker:
       context: .
       path: ./docker/Dockerfile.ui
@@ -16,7 +16,7 @@ services:
   api:
     language: java
     host: containerapp
-    project: ../../
+    project: .
     docker:
       context: .
       path: ./docker/Dockerfile.customer-assistant
