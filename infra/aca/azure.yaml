@@ -21,4 +21,4 @@ services:
       context: .
       path: ./docker/Dockerfile.customer-assistant
       ports:
-        - "8080:80"
+        - "80:80"

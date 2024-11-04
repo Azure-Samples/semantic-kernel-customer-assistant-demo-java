@@ -35,14 +35,6 @@ cd infra/aca
 azd up
 ```
 
-When deployed, you will need to grant "Cogntive Services User" role to the managed identity of the api service. Inside
-the resource group of the deployed resources, find the managed identity of the api service, named `id-api-xxxx`.
-We need to [assign the "Cognitive Services User" role to the
-`id-api-xxxx` managed identity](https://learn.microsoft.com/en-us/entra/identity/managed-identities-azure-resources/how-to-assign-access-azure-resource?pivots=identity-mi-access-portal).
-Browse to your Azure OpenAI instance in the portal, select "Access control (IAM)", "Role assignments" and add a role
-assignment for the managed identity.
-After permission has been granted you can restart your application by re-running `azd up`.
-
 You can now browse to the web service of the deployed asset that will be displayed in the output of the `azd up`. Will
 look like: `https://ca-web-XXXX.azurecontainerapps.io/`
 
@@ -61,20 +53,6 @@ docker compose up --build --force-recreate
 ```
 
 When started the app will be available at `http://localhost:3000/`.
-
-## Troubleshooting
-
-#### My API instance is crashing with a "DeploymentNotFound" error
-
-You have probably not deployed the chat completion and embeddings OpenAI models to the instance, or then names of your
-deployments do not match the configured values in demo.properties (default values are `gpt-4o` and `text-embedding-3-large`).
-
-#### I receive errors when running the application "json_schema is not supported"
-
-Ensure that the model you have deployed supports the `json_schema` format, at time of writing this requires:
-- gpt-4o-mini-2024-07-18 and later
-- gpt-4o-2024-08-06 and later
-See: https://platform.openai.com/docs/guides/structured-outputs/introduction
 
 ## Resources
 
