@@ -27,8 +27,6 @@ To deploy the application you will need a deployment of OpenAI. This will need t
 You will be asked for the resource group and the name of the OpenAI instance during deployment.
 
 ```bash
-cd infra/aca
-
 ## If needed
 # azd auth login
 

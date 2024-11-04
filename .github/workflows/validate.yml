@@ -33,7 +33,6 @@ jobs:
 
       - uses: microsoft/template-validation-action@v0.3.2
         with:
-          workingDirectory: ./infra/aca
           useDevContainer: false
         id: validation
         env:
