@@ -9,14 +9,6 @@ param environmentName string
 @description('Primary location for all resources')
 param location string
 
-@minLength(1)
-@description('Openai Deployment Name')
-param openAiServiceName string
-
-@minLength(1)
-@description('Openai Deployment Resource Group Name')
-param openAiResourceGroupName string
-
 // Optional parameters to override the default azd resource naming conventions. Update the main.parameters.json file to provide values. e.g.,:
 // "resourceGroupName": {
 //      "value": "myGroupName"
@@ -35,6 +27,18 @@ param webContainerAppName string = ''
 param apimServiceName string = ''
 param apiAppExists bool = false
 param webAppExists bool = false
+param openAiSkuName string = 'S0'
+
+param chatGptModelName string = 'gpt-4o'
+param chatGptDeploymentName string = 'gpt-4o'
+param chatGptModelVersion string = '2024-08-06'
+param chatGptDeploymentCapacity int = 60
+
+param embeddingModelName string = 'text-embedding-3-large'
+param embeddingDeploymentName string = 'text-embedding-3-large'
+param embeddingModelVersion string = '1'
+param embeddingDeploymentCapacity int = 80
+
 
 @description('Flag to use Azure API Management to mediate the calls between the Web frontend and the backend API')
 param useAPIM bool = false
@@ -51,7 +55,6 @@ param principalId string = ''
 @description('The base URL used by the web service for sending API requests')
 param webApiBaseUrl string = ''
 
-var openaiEndpoint = 'https://${openAiServiceName}.openai.azure.com/'
 var abbrs = loadJsonContent('./abbreviations.json')
 var resourceToken = toLower(uniqueString(subscription().id, environmentName, location))
 var tags = { 'azd-env-name': environmentName }
@@ -87,15 +90,58 @@ module containerApps './core/host/container-apps.bicep' = {
   }
 }
 
-resource openAiService 'Microsoft.CognitiveServices/accounts@2023-05-01' existing = {
-  name: openAiServiceName
-  scope: resourceGroup(openAiResourceGroupName)
+
+resource openAiResourceGroup 'Microsoft.Resources/resourceGroups@2021-04-01' existing =  {
+  name: rg.name
+}
+
+module openAiService './core/ai/cognitiveservices.bicep' =  {
+  name: 'openai'
+  scope: openAiResourceGroup
+  params: {
+    name: '${abbrs.cognitiveServicesAccounts}${resourceToken}'
+    location: location
+    tags: tags
+    sku: {
+      name: openAiSkuName
+    }
+    deployments: [
+      {
+        name: chatGptDeploymentName
+        model: {
+          format: 'OpenAI'
+          name: chatGptModelName
+          version: chatGptModelVersion
+        }
+        sku: {
+          name: 'Standard'
+          capacity: chatGptDeploymentCapacity
+        }
+      }
+      {
+        name: embeddingDeploymentName
+        model: {
+          format: 'OpenAI'
+          name: embeddingModelName
+          version: embeddingModelVersion
+        }
+        sku: {
+          name: 'Standard'
+          capacity: embeddingDeploymentCapacity
+        }
+      }
+    ]
+  }
 }
 
 // Cogitive Services User Role
 var roleDefinitionID = 'a97b65f3-24c7-4388-baec-2e87135dc908'
 
-var openAiServicePrincipalId = guid(openAiResourceGroupName, openAiServiceName, roleDefinitionID)
+var openAiName = openAiService.outputs.name
+
+var openAiServicePrincipalId = guid(rg.name, openAiName, roleDefinitionID)
+
+var openaiEndpoint = 'https://${openAiName}.openai.azure.com/'
 
 // Api backend
 module api './app/api.bicep' = {
@@ -115,14 +161,14 @@ module api './app/api.bicep' = {
     exists: apiAppExists
     openaiEndpoint: openaiEndpoint
     openAiServicePrincipalId: openAiServicePrincipalId
-    openAiServiceName: openAiServiceName
-    openAiResourceGroupName: openAiResourceGroupName
+    openAiServiceName: openAiName
+    openAiResourceGroupName: rg.name
   }
 }
 
 module apiAuth './app/apiAuth.bicep' = {
   name: 'apiAuth'
-  scope: resourceGroup(openAiResourceGroupName)
+  scope: rg
   params: {
     name: 'apiAuth'
     location: location

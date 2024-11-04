@@ -32,7 +32,7 @@ USER deploy
 
 COPY --from=build-demo --chown=deploy /tmp/build/target/quarkus-app /home/deploy/
 
-EXPOSE 8080
+EXPOSE 80
 
 CMD /home/deploy/run.sh
 
