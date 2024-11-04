@@ -9,6 +9,8 @@ on:
 
 permissions:
   contents: read
+  id-token: write
+  pull-requests: write
 
 jobs:
   # Builds and tests the Java project
