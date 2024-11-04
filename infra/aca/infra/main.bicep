@@ -102,6 +102,7 @@ module openAiService './core/ai/cognitiveservices.bicep' =  {
     name: '${abbrs.cognitiveServicesAccounts}${resourceToken}'
     location: location
     tags: tags
+    disableLocalAuth: true
     sku: {
       name: openAiSkuName
     }
