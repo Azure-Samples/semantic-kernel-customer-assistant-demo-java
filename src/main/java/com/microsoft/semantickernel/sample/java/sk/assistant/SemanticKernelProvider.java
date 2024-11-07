@@ -46,6 +46,7 @@ import java.util.Properties;
  * A factory class that constructs kernels for use by the application
  */
 @ApplicationScoped
+
 public class SemanticKernelProvider {
     private static DataSource datasource;
     private final CustomerController customerController;
