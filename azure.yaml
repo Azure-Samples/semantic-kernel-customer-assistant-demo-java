@@ -9,6 +9,7 @@ services:
     docker:
       context: .
       path: ./docker/Dockerfile.ui
+      remoteBuild: true
     ports:
       - "8080:80"
     depends_on:
@@ -20,5 +21,6 @@ services:
     docker:
       context: .
       path: ./docker/Dockerfile.customer-assistant
+      remoteBuild: true
       ports:
         - "80:80"
